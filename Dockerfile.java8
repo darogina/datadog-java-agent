@@ -1,0 +1,20 @@
+FROM maven:3-jdk-8 as builder
+
+ARG JVER=8
+
+WORKDIR /build
+
+COPY ./src /build/src/
+COPY ./pom.xml /build/
+
+RUN ls -lai && mvn clean package -Djava.version=${JVER} -Dmaven.test.skip=true
+
+FROM openjdk:8-jre-slim
+
+WORKDIR /app
+ADD 'https://search.maven.org/classic/remote_content?g=com.datadoghq&a=dd-java-agent&v=LATEST' /app/dd-java-agent.jar
+COPY --from=builder /build/target/gs-spring-boot-0.1.0.jar /app/app.jar
+
+ENV JAVA_TOOL_OPTIONS="-javaagent:/app/dd-java-agent.jar"
+
+CMD [ "java", "-jar", "/app/app.jar" ]
