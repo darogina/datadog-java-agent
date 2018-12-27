@@ -1,4 +1,4 @@
-FROM maven:3-jdk-11 as builder
+FROM maven:3-jdk-11-slim as builder
 
 ARG JVER=11
 
@@ -7,7 +7,7 @@ WORKDIR /build
 COPY ./src /build/src/
 COPY ./pom.xml /build/
 
-RUN ls -lai && mvn clean package -Djava.version=${JVER} -Dmaven.test.skip=true
+RUN ls -lai && mvn clean package -Djava.version=${JVER} -Dmaven.test.skip=true -Djavax.net.ssl.trustStorePassword=changeit
 
 FROM openjdk:11-jre-slim
 
